@@ -106,8 +106,8 @@ pub fn assemble(assembly: Vec<Assembly>) -> Result<Vec<u32>, String> {
         let formatted = match asm {
             LUI(rd, imm) => Format::U { imm, rd, opcode: 0b0110111 },
             AUIPC(rd, imm) => Format::U { imm, rd, opcode: 0b0010111 },
-            JAL(rd, imm) => Format::J { imm: imm as u32, rd, opcode: 0b1101111 },
-            JALR(rd, ofs, rs1) => Format::I { imm: ofs as u32, rs1, funct3: 0b000, rd, opcode: 0b1100111 },
+            JAL(rd, ofs) => Format::J { imm: (ofs << 2) as u32, rd, opcode: 0b1101111 },
+            JALR(rd, ofs, rs1) => Format::I { imm: (ofs << 2) as u32, rs1, funct3: 0b000, rd, opcode: 0b1100111 },
 
             BEQ(rs1, rs2, ofs) => Format::B { imm: (ofs << 2) as u32, rs2, rs1, funct3: 0b000, opcode: 0b1100011 },
             BNE(rs1, rs2, ofs) => Format::B { imm: (ofs << 2) as u32, rs2, rs1, funct3: 0b001, opcode: 0b1100011 },

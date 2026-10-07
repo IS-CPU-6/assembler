@@ -108,11 +108,15 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<Vec<Assembly>, String> {
             [Id(label), Colon] => {
                 label_map.insert(label, line);
             }
+            [] => {}
             _ => {
                 line += 1;
             }
         }
+        one_line = vec![];
     }
+
+    println!("{:?}", label_map);
 
     // assemble
     let mut assembly = Vec::new();
@@ -327,7 +331,7 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<Vec<Assembly>, String> {
                 Comma,
                 Reg(r3),
             ] => vec![FNORM_S(*rd, *r1, *r2, *r3)],
-
+            [] => vec![],
             _ => {
                 return Err(format!(
                     "invalid expression in line {}: {:?}",

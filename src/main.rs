@@ -44,6 +44,8 @@ fn main() {
     let assembly =
         parser::parse(&tokens).unwrap_or_else(|e| exit(&format!("failed to parse: {}", e)));
 
+    println!("{:?}", assembly);
+
     let bin = assembler::assemble(assembly)
         .unwrap_or_else(|e| exit(&format!("failed to assemble: {}", e)));
 

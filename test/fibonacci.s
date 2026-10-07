@@ -1,29 +1,29 @@
 _start:
-    li   t0, 10
+    addi x5, x0, 10
     
-    li   t1, 0
-    li   t2, 1
+    addi x6, x0, 0
+    addi x7, x0, 1
     
-    blez t0, return_t1
-    li   t3, 1
+    bge  x0, x5, return_t1
+    addi x28, x0, 1
 
 loop:
-    bge  t3, t0, done
+    bge  x28, x5, done
     
-    add  t4, t1, t2
-    mv   t1, t2
-    mv   t2, t4
+    add  x29, x6, x7
+    addi x6, x7, 0
+    addi x7, x29, 0
     
-    addi t3, t3, 1
-    j    loop
+    addi x28, x28, 1
+    jal  x0, loop
 
 done:
-    mv   a0, t2
-    j    exit
+    addi x10, x7, 0
+    jal  x0, exit
 
 return_t1:
-    mv   a0, t1
+    addi x10, x6, 0
 
 exit:
-    li   a7, 10
-    ecall
+    addi x17, x0, 10
+    ebreak
