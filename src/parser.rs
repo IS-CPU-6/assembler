@@ -4,6 +4,7 @@ use crate::lexer::Token;
 use crate::lexer::Token::*;
 
 #[derive(Debug, Clone)]
+#[allow(non_camel_case_types)]
 pub enum Assembly {
     LUI(u32, u32),
     AUIPC(u32, u32),
@@ -112,8 +113,6 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<Vec<Assembly>, String> {
             }
         }
     }
-
-    println!("{:?}", label_map);
 
     // assemble
     let mut assembly = Vec::new();
