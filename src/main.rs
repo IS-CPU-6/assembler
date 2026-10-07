@@ -6,13 +6,25 @@ use clap::Parser;
 use std::fs;
 use std::process;
 
+use std::fs::File;
+use std::io::{self, Write};
+
+// little endian
+pub fn write_to_bin(path: &str, bin: &[u32]) -> io::Result<()> {
+    let mut file = File::create(path)?;
+    for &inst in bin {
+        file.write_all(&inst.to_le_bytes())?;
+    }
+    Ok(())
+}
+
 #[derive(Parser)]
 #[command(author, version, about = "", long_about = None)]
 struct Cli {
     #[arg(short, long, default_value = "")]
     input: String,
-    // #[arg(short, long)]
-    // output: Option<String>,
+    #[arg(short, long)]
+    output: String,
 }
 
 fn exit(msg: &str) -> ! {
@@ -38,4 +50,6 @@ fn main() {
         .unwrap_or_else(|e| exit(&format!("failed to assemble: {}", e)));
 
     println!("{:?}", bin);
+
+    write_to_bin(&cli.output, &bin);
 }
