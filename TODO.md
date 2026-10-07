@@ -1,0 +1,3 @@
+- コメント
+- 即値bit幅チェック・bin出力
+- register t0~t7?
