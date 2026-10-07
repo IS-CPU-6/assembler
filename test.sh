@@ -1,5 +1,7 @@
 cd $(dirname $0)
 
+cargo build
+
 mkdir -p build
 
 INPUT=$1

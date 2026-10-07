@@ -38,8 +38,6 @@ fn main() {
     let asm = fs::read_to_string(&cli.input)
         .unwrap_or_else(|e| exit(&format!("failed to open assembly ({}): {}", cli.input, e)));
 
-    println!("{}", asm);
-
     let tokens =
         lexer::tokenize(&asm).unwrap_or_else(|e| exit(&format!("failed to tokenize: {}", e)));
 
@@ -49,7 +47,5 @@ fn main() {
     let bin = assembler::assemble(assembly)
         .unwrap_or_else(|e| exit(&format!("failed to assemble: {}", e)));
 
-    println!("{:?}", bin);
-
-    write_to_bin(&cli.output, &bin);
+    let _ = write_to_bin(&cli.output, &bin);
 }

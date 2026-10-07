@@ -109,12 +109,12 @@ pub fn assemble(assembly: Vec<Assembly>) -> Result<Vec<u32>, String> {
             JAL(rd, imm) => Format::J { imm: imm as u32, rd, opcode: 0b1101111 },
             JALR(rd, ofs, rs1) => Format::I { imm: ofs as u32, rs1, funct3: 0b000, rd, opcode: 0b1100111 },
 
-            BEQ(rs1, rs2, ofs) => Format::B { imm: ofs as u32, rs2, rs1, funct3: 0b000, opcode: 0b1100011 },
-            BNE(rs1, rs2, ofs) => Format::B { imm: ofs as u32, rs2, rs1, funct3: 0b001, opcode: 0b1100011 },
-            BLT(rs1, rs2, ofs) => Format::B { imm: ofs as u32, rs2, rs1, funct3: 0b100, opcode: 0b1100011 },
-            BGE(rs1, rs2, ofs) => Format::B { imm: ofs as u32, rs2, rs1, funct3: 0b101, opcode: 0b1100011 },
-            BLTU(rs1, rs2, ofs) => Format::B { imm: ofs as u32, rs2, rs1, funct3: 0b110, opcode: 0b1100011 },
-            BGEU(rs1, rs2, ofs) => Format::B { imm: ofs as u32, rs2, rs1, funct3: 0b111, opcode: 0b1100011 },
+            BEQ(rs1, rs2, ofs) => Format::B { imm: (ofs << 2) as u32, rs2, rs1, funct3: 0b000, opcode: 0b1100011 },
+            BNE(rs1, rs2, ofs) => Format::B { imm: (ofs << 2) as u32, rs2, rs1, funct3: 0b001, opcode: 0b1100011 },
+            BLT(rs1, rs2, ofs) => Format::B { imm: (ofs << 2) as u32, rs2, rs1, funct3: 0b100, opcode: 0b1100011 },
+            BGE(rs1, rs2, ofs) => Format::B { imm: (ofs << 2) as u32, rs2, rs1, funct3: 0b101, opcode: 0b1100011 },
+            BLTU(rs1, rs2, ofs) => Format::B { imm: (ofs << 2) as u32, rs2, rs1, funct3: 0b110, opcode: 0b1100011 },
+            BGEU(rs1, rs2, ofs) => Format::B { imm: (ofs << 2) as u32, rs2, rs1, funct3: 0b111, opcode: 0b1100011 },
 
             LB(rd, ofs, rs1) => Format::I { imm: ofs as u32, rs1, funct3: 0b000, rd, opcode: 0b0000011 },
             LH(rd, ofs, rs1) => Format::I { imm: ofs as u32, rs1, funct3: 0b001, rd, opcode: 0b0000011 },
