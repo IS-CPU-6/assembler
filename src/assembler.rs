@@ -157,8 +157,8 @@ pub fn assemble(assembly: Vec<Assembly>) -> Result<Vec<u32>, String> {
             REM(rd, rs1, rs2) => Format::R { funct7: 0b0000001, rs2, rs1, funct3: 0b110, rd, opcode: 0b0110011 },
             REMU(rd, rs1, rs2) => Format::R { funct7: 0b0000001, rs2, rs1, funct3: 0b111, rd, opcode: 0b0110011 },
 
-            FLW(rd, ofs, rs1) => Format::I { imm: ofs as u32, rs1, funct3: 0b010, rd, opcode: 0b0000111 },
-            FSW(rs2, ofs, rs1) => Format::S { imm: ofs as u32, rs2, rs1, funct3: 0b010, opcode: 0b0100111 },
+            FLW(rd, ofs, rs1) => Format::I { imm: (ofs << 2) as u32, rs1, funct3: 0b010, rd, opcode: 0b0000111 },
+            FSW(rs2, ofs, rs1) => Format::S { imm: (ofs << 2) as u32, rs2, rs1, funct3: 0b010, opcode: 0b0100111 },
             FADD_S(rd, rs1, rs2) => Format::R { funct7: 0b0000000, rs2, rs1, funct3: 0b000, rd, opcode: 0b1010011 },
             FSUB_S(rd, rs1, rs2) => Format::R { funct7: 0b0000100, rs2, rs1, funct3: 0b000, rd, opcode: 0b1010011 },
             FMUL_S(rd, rs1, rs2) => Format::R { funct7: 0b0001000, rs2, rs1, funct3: 0b000, rd, opcode: 0b1010011 },

@@ -6,9 +6,11 @@ pub enum Token<'s> {
     #[regex(r"[a-zA-Z_][a-zA-Z0-9_]*", |lex| lex.slice())]
     Id(&'s str),
 
-    #[regex(r"x[0-9]+|sp|fp|ra", |lex| {
+    #[regex(r"[x|f][0-9]+|sp|fp|ra", |lex| {
         let s = lex.slice();
         if s.starts_with('x') {
+            s[1..].parse::<u32>().unwrap_or(0)
+        } else if s.starts_with('f') {
             s[1..].parse::<u32>().unwrap_or(0)
         } else {
             match s {
