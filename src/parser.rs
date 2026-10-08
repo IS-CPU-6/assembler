@@ -130,15 +130,15 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<Vec<Assembly>, String> {
         let asm: Vec<Assembly> = match one_line[..] {
             [Id(_), Colon] => vec![],
 
-            [Id("lui"), Reg(rd), Comma, Int(imm)] => vec![LUI(*rd, *imm)],
-            [Id("auipc"), Reg(rd), Comma, Int(imm)] => vec![AUIPC(*rd, *imm)],
+            [Id("lui"), Reg(rd), Comma, Int(imm)] => vec![LUI(*rd, *imm as u32)],
+            [Id("auipc"), Reg(rd), Comma, Int(imm)] => vec![AUIPC(*rd, *imm as u32)],
             [Id("jal"), Reg(rd), Comma, Id(label)] => vec![JAL(
                 *rd,
                 label_map.get(label).copied().unwrap_or(0) - assembly.len() as i32,
             )],
             [Id("jal"), Reg(rd), Comma, Int(imm)] => vec![JAL(*rd, (*imm) as i32)],
             [Id("jalr"), Reg(rd), Comma, Int(offset), Comma, Reg(rs1)] => {
-                vec![JALR(*rd, (*offset) as i32, *rs1)]
+                vec![JALR(*rd, ((*offset) as i32).into(), *rs1)]
             }
 
             [Id("beq"), Reg(rs1), Comma, Reg(rs2), Comma, Id(label)] => vec![BEQ(
@@ -173,28 +173,28 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<Vec<Assembly>, String> {
             )],
 
             [Id("lb"), Reg(rd), Comma, Int(offset), Comma, Reg(rs1)] => {
-                vec![LB(*rd, (*offset) as i32, *rs1)]
+                vec![LB(*rd, ((*offset) as i32).into(), *rs1)]
             }
             [Id("lh"), Reg(rd), Comma, Int(offset), Comma, Reg(rs1)] => {
-                vec![LH(*rd, (*offset) as i32, *rs1)]
+                vec![LH(*rd, ((*offset) as i32).into(), *rs1)]
             }
             [Id("lw"), Reg(rd), Comma, Int(offset), Comma, Reg(rs1)] => {
-                vec![LW(*rd, (*offset) as i32, *rs1)]
+                vec![LW(*rd, ((*offset) as i32).into(), *rs1)]
             }
             [Id("lbu"), Reg(rd), Comma, Int(offset), Comma, Reg(rs1)] => {
-                vec![LBU(*rd, (*offset) as i32, *rs1)]
+                vec![LBU(*rd, ((*offset) as i32).into(), *rs1)]
             }
             [Id("lhu"), Reg(rd), Comma, Int(offset), Comma, Reg(rs1)] => {
-                vec![LHU(*rd, (*offset) as i32, *rs1)]
+                vec![LHU(*rd, ((*offset) as i32).into(), *rs1)]
             }
             [Id("sb"), Reg(rs2), Comma, Int(offset), Comma, Reg(rs1)] => {
-                vec![SB(*rs2, (*offset) as i32, *rs1)]
+                vec![SB(*rs2, ((*offset) as i32).into(), *rs1)]
             }
             [Id("sh"), Reg(rs2), Comma, Int(offset), Comma, Reg(rs1)] => {
-                vec![SH(*rs2, (*offset) as i32, *rs1)]
+                vec![SH(*rs2, ((*offset) as i32).into(), *rs1)]
             }
             [Id("sw"), Reg(rs2), Comma, Int(offset), Comma, Reg(rs1)] => {
-                vec![SW(*rs2, (*offset) as i32, *rs1)]
+                vec![SW(*rs2, ((*offset) as i32).into(), *rs1)]
             }
 
             [Id("addi"), Reg(rd), Comma, Reg(r1), Comma, Int(imm)] => {
@@ -216,13 +216,13 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<Vec<Assembly>, String> {
                 vec![ANDI(*rd, *r1, (*imm) as i32)]
             }
             [Id("slli"), Reg(rd), Comma, Reg(r1), Comma, Int(imm)] => {
-                vec![SLLI(*rd, *r1, *imm)]
+                vec![SLLI(*rd, *r1, (*imm) as u32)]
             }
             [Id("srli"), Reg(rd), Comma, Reg(r1), Comma, Int(imm)] => {
-                vec![SRLI(*rd, *r1, *imm)]
+                vec![SRLI(*rd, *r1, (*imm) as u32)]
             }
             [Id("srai"), Reg(rd), Comma, Reg(r1), Comma, Int(imm)] => {
-                vec![SRAI(*rd, *r1, *imm)]
+                vec![SRAI(*rd, *r1, (*imm) as u32)]
             }
 
             [Id("add"), Reg(rd), Comma, Reg(r1), Comma, Reg(r2)] => vec![ADD(*rd, *r1, *r2)],
@@ -250,10 +250,10 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<Vec<Assembly>, String> {
 
             //
             [Id("flw"), Reg(rd), Comma, Int(offset), Comma, Reg(rs1)] => {
-                vec![FLW(*rd, (*offset) as i32, *rs1)]
+                vec![FLW(*rd, ((*offset) as i32).into(), *rs1)]
             }
             [Id("fsw"), Reg(rs2), Comma, Int(offset), Comma, Reg(rs1)] => {
-                vec![FSW(*rs2, (*offset) as i32, *rs1)]
+                vec![FSW(*rs2, ((*offset) as i32).into(), *rs1)]
             }
             [Id("fadd.s"), Reg(rd), Comma, Reg(r1), Comma, Reg(r2)] => vec![FADD_S(*rd, *r1, *r2)],
             [Id("fsub.s"), Reg(rd), Comma, Reg(r1), Comma, Reg(r2)] => vec![FSUB_S(*rd, *r1, *r2)],

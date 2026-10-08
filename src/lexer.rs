@@ -21,9 +21,9 @@ pub enum Token<'s> {
     })]
     Reg(u32),
 
-    #[regex(r"0[xX][0-9a-fA-F]+", |lex| u32::from_str_radix(&lex.slice()[2..], 16).unwrap())]
-    #[regex(r"-?[0-9]+", |lex| lex.slice().parse::<u32>().unwrap())]
-    Int(u32),
+    #[regex(r"0[xX][0-9a-fA-F]+", |lex| i32::from_str_radix(&lex.slice()[2..], 16).unwrap())]
+    #[regex(r"-?[0-9]+", |lex| lex.slice().parse::<i32>().unwrap())]
+    Int(i32),
 
     #[token(":")]
     Colon,
