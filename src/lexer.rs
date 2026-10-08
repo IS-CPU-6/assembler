@@ -31,6 +31,12 @@ pub enum Token<'s> {
     #[token(",")]
     Comma,
 
+    #[token("(")]
+    Open,
+
+    #[token(")")]
+    Close,
+
     #[token("\n")]
     Return,
 }
