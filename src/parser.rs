@@ -130,71 +130,164 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<Vec<Assembly>, String> {
         let asm: Vec<Assembly> = match one_line[..] {
             [Id(_), Colon] => vec![],
 
-            [Id("lui"), Reg(rd), Comma, Int(imm)] => vec![LUI(*rd, *imm)],
-            [Id("auipc"), Reg(rd), Comma, Int(imm)] => vec![AUIPC(*rd, *imm)],
-            [Id("jal"), Reg(rd), Comma, Id(label)] => vec![JAL(
-                *rd,
-                label_map.get(label).copied().unwrap_or(0) - assembly.len() as i32,
-            )],
-            [Id("jal"), Reg(rd), Comma, Int(imm)] => vec![JAL(*rd, (*imm) as i32)],
-            [Id("jalr"), Reg(rd), Comma, Int(offset), Comma, Reg(rs1)] => {
-                vec![JALR(*rd, (*offset) as i32, *rs1)]
+            [Id("lui"), Reg(rd), Comma, Int(imm)] => vec![LUI(*rd, *imm as u32)],
+            [Id("auipc"), Reg(rd), Comma, Int(imm)] => vec![AUIPC(*rd, *imm as u32)],
+            [Id("jal"), Reg(rd), Comma, dest] => {
+                vec![JAL(
+                    *rd,
+                    match dest {
+                        Int(offset) => *offset >> 2,
+                        Id(label) => {
+                            label_map.get(label).copied().unwrap_or(0) - assembly.len() as i32
+                        }
+                        _ => {
+                            return Err(format!("{:?}: invalid branch dest", one_line));
+                        }
+                    },
+                )]
+            }
+            [
+                Id("jalr"),
+                Reg(rd),
+                Comma,
+                Int(offset),
+                Open,
+                Reg(rs1),
+                Close,
+            ] => {
+                vec![JALR(*rd, *offset >> 2, *rs1)]
             }
 
-            [Id("beq"), Reg(rs1), Comma, Reg(rs2), Comma, Id(label)] => vec![BEQ(
+            [Id("beq"), Reg(rs1), Comma, Reg(rs2), Comma, dest] => vec![BEQ(
                 *rs1,
                 *rs2,
-                label_map.get(label).copied().unwrap_or(0) - assembly.len() as i32,
+                match dest {
+                    Id(label) => label_map.get(label).copied().unwrap_or(0) - assembly.len() as i32,
+                    Int(offset) => offset >> 2,
+                    _ => {
+                        return Err(format!("{:?}: invalid branch dest", one_line));
+                    }
+                },
             )],
-            [Id("bne"), Reg(rs1), Comma, Reg(rs2), Comma, Id(label)] => vec![BNE(
+            [Id("bne"), Reg(rs1), Comma, Reg(rs2), Comma, dest] => vec![BNE(
                 *rs1,
                 *rs2,
-                label_map.get(label).copied().unwrap_or(0) - assembly.len() as i32,
+                match dest {
+                    Id(label) => label_map.get(label).copied().unwrap_or(0) - assembly.len() as i32,
+                    Int(offset) => offset >> 2,
+                    _ => {
+                        return Err(format!("{:?}: invalid branch dest", one_line));
+                    }
+                },
             )],
-            [Id("blt"), Reg(rs1), Comma, Reg(rs2), Comma, Id(label)] => vec![BLT(
+            [Id("blt"), Reg(rs1), Comma, Reg(rs2), Comma, dest] => vec![BLT(
                 *rs1,
                 *rs2,
-                label_map.get(label).copied().unwrap_or(0) - assembly.len() as i32,
+                match dest {
+                    Id(label) => label_map.get(label).copied().unwrap_or(0) - assembly.len() as i32,
+                    Int(offset) => offset >> 2,
+                    _ => {
+                        return Err(format!("{:?}: invalid branch dest", one_line));
+                    }
+                },
             )],
-            [Id("bge"), Reg(rs1), Comma, Reg(rs2), Comma, Id(label)] => vec![BGE(
+            [Id("bge"), Reg(rs1), Comma, Reg(rs2), Comma, dest] => vec![BGE(
                 *rs1,
                 *rs2,
-                label_map.get(label).copied().unwrap_or(0) - assembly.len() as i32,
+                match dest {
+                    Id(label) => label_map.get(label).copied().unwrap_or(0) - assembly.len() as i32,
+                    Int(offset) => offset >> 2,
+                    _ => {
+                        return Err(format!("{:?}: invalid branch dest", one_line));
+                    }
+                },
             )],
-            [Id("bltu"), Reg(rs1), Comma, Reg(rs2), Comma, Id(label)] => vec![BLTU(
+            [Id("bltu"), Reg(rs1), Comma, Reg(rs2), Comma, dest] => vec![BLTU(
                 *rs1,
                 *rs2,
-                label_map.get(label).copied().unwrap_or(0) - assembly.len() as i32,
+                match dest {
+                    Id(label) => label_map.get(label).copied().unwrap_or(0) - assembly.len() as i32,
+                    Int(offset) => offset >> 2,
+                    _ => {
+                        return Err(format!("{:?}: invalid branch dest", one_line));
+                    }
+                },
             )],
-            [Id("bgeu"), Reg(rs1), Comma, Reg(rs2), Comma, Id(label)] => vec![BGEU(
+            [Id("bgeu"), Reg(rs1), Comma, Reg(rs2), Comma, dest] => vec![BGEU(
                 *rs1,
                 *rs2,
-                label_map.get(label).copied().unwrap_or(0) - assembly.len() as i32,
+                match dest {
+                    Id(label) => label_map.get(label).copied().unwrap_or(0) - assembly.len() as i32,
+                    Int(offset) => offset >> 2,
+                    _ => {
+                        return Err(format!("{:?}: invalid branch dest", one_line));
+                    }
+                },
             )],
 
-            [Id("lb"), Reg(rd), Comma, Int(offset), Comma, Reg(rs1)] => {
-                vec![LB(*rd, (*offset) as i32, *rs1)]
+            [Id("lb"), Reg(rd), Comma, Int(offset), Open, Reg(rs1), Close] => {
+                vec![LB(*rd, ((*offset) as i32).into(), *rs1)]
             }
-            [Id("lh"), Reg(rd), Comma, Int(offset), Comma, Reg(rs1)] => {
-                vec![LH(*rd, (*offset) as i32, *rs1)]
+            [Id("lh"), Reg(rd), Comma, Int(offset), Open, Reg(rs1), Close] => {
+                vec![LH(*rd, ((*offset) as i32).into(), *rs1)]
             }
-            [Id("lw"), Reg(rd), Comma, Int(offset), Comma, Reg(rs1)] => {
-                vec![LW(*rd, (*offset) as i32, *rs1)]
+            [Id("lw"), Reg(rd), Comma, Int(offset), Open, Reg(rs1), Close] => {
+                vec![LW(*rd, ((*offset) as i32).into(), *rs1)]
             }
-            [Id("lbu"), Reg(rd), Comma, Int(offset), Comma, Reg(rs1)] => {
-                vec![LBU(*rd, (*offset) as i32, *rs1)]
+            [
+                Id("lbu"),
+                Reg(rd),
+                Comma,
+                Int(offset),
+                Open,
+                Reg(rs1),
+                Close,
+            ] => {
+                vec![LBU(*rd, ((*offset) as i32).into(), *rs1)]
             }
-            [Id("lhu"), Reg(rd), Comma, Int(offset), Comma, Reg(rs1)] => {
-                vec![LHU(*rd, (*offset) as i32, *rs1)]
+            [
+                Id("lhu"),
+                Reg(rd),
+                Comma,
+                Int(offset),
+                Open,
+                Reg(rs1),
+                Close,
+            ] => {
+                vec![LHU(*rd, ((*offset) as i32).into(), *rs1)]
             }
-            [Id("sb"), Reg(rs2), Comma, Int(offset), Comma, Reg(rs1)] => {
-                vec![SB(*rs2, (*offset) as i32, *rs1)]
+            [
+                Id("sb"),
+                Reg(rs2),
+                Comma,
+                Int(offset),
+                Open,
+                Reg(rs1),
+                Close,
+            ] => {
+                vec![SB(*rs2, ((*offset) as i32).into(), *rs1)]
             }
-            [Id("sh"), Reg(rs2), Comma, Int(offset), Comma, Reg(rs1)] => {
-                vec![SH(*rs2, (*offset) as i32, *rs1)]
+            [
+                Id("sh"),
+                Reg(rs2),
+                Comma,
+                Int(offset),
+                Open,
+                Reg(rs1),
+                Close,
+            ] => {
+                vec![SH(*rs2, ((*offset) as i32).into(), *rs1)]
             }
-            [Id("sw"), Reg(rs2), Comma, Int(offset), Comma, Reg(rs1)] => {
-                vec![SW(*rs2, (*offset) as i32, *rs1)]
+            [
+                Id("sw"),
+                Reg(rs2),
+                Comma,
+                Int(offset),
+                Open,
+                Reg(rs1),
+                Close,
+            ] => {
+                vec![SW(*rs2, ((*offset) as i32).into(), *rs1)]
             }
 
             [Id("addi"), Reg(rd), Comma, Reg(r1), Comma, Int(imm)] => {
@@ -216,13 +309,13 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<Vec<Assembly>, String> {
                 vec![ANDI(*rd, *r1, (*imm) as i32)]
             }
             [Id("slli"), Reg(rd), Comma, Reg(r1), Comma, Int(imm)] => {
-                vec![SLLI(*rd, *r1, *imm)]
+                vec![SLLI(*rd, *r1, (*imm) as u32)]
             }
             [Id("srli"), Reg(rd), Comma, Reg(r1), Comma, Int(imm)] => {
-                vec![SRLI(*rd, *r1, *imm)]
+                vec![SRLI(*rd, *r1, (*imm) as u32)]
             }
             [Id("srai"), Reg(rd), Comma, Reg(r1), Comma, Int(imm)] => {
-                vec![SRAI(*rd, *r1, *imm)]
+                vec![SRAI(*rd, *r1, (*imm) as u32)]
             }
 
             [Id("add"), Reg(rd), Comma, Reg(r1), Comma, Reg(r2)] => vec![ADD(*rd, *r1, *r2)],
@@ -249,11 +342,27 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<Vec<Assembly>, String> {
             [Id("remu"), Reg(rd), Comma, Reg(r1), Comma, Reg(r2)] => vec![REMU(*rd, *r1, *r2)],
 
             //
-            [Id("flw"), Reg(rd), Comma, Int(offset), Comma, Reg(rs1)] => {
-                vec![FLW(*rd, (*offset) as i32, *rs1)]
+            [
+                Id("flw"),
+                Reg(rd),
+                Comma,
+                Int(offset),
+                Open,
+                Reg(rs1),
+                Close,
+            ] => {
+                vec![FLW(*rd, *offset >> 2, *rs1)]
             }
-            [Id("fsw"), Reg(rs2), Comma, Int(offset), Comma, Reg(rs1)] => {
-                vec![FSW(*rs2, (*offset) as i32, *rs1)]
+            [
+                Id("fsw"),
+                Reg(rs2),
+                Comma,
+                Int(offset),
+                Open,
+                Reg(rs1),
+                Close,
+            ] => {
+                vec![FSW(*rs2, *offset >> 2, *rs1)]
             }
             [Id("fadd.s"), Reg(rd), Comma, Reg(r1), Comma, Reg(r2)] => vec![FADD_S(*rd, *r1, *r2)],
             [Id("fsub.s"), Reg(rd), Comma, Reg(r1), Comma, Reg(r2)] => vec![FSUB_S(*rd, *r1, *r2)],

@@ -157,20 +157,20 @@ pub fn assemble(assembly: Vec<Assembly>) -> Result<Vec<u32>, String> {
             REM(rd, rs1, rs2) => Format::R { funct7: 0b0000001, rs2, rs1, funct3: 0b110, rd, opcode: 0b0110011 },
             REMU(rd, rs1, rs2) => Format::R { funct7: 0b0000001, rs2, rs1, funct3: 0b111, rd, opcode: 0b0110011 },
 
-            FLW(rd, ofs, rs1) => Format::I { imm: ofs as u32, rs1, funct3: 0b010, rd, opcode: 0b0000111 },
-            FSW(rs2, ofs, rs1) => Format::S { imm: ofs as u32, rs2, rs1, funct3: 0b010, opcode: 0b0100111 },
-            FADD_S(rd, rs1, rs2) => Format::R { funct7: 0b0000000, rs2, rs1, funct3: 0b000, rd, opcode: 0b1010011 },
-            FSUB_S(rd, rs1, rs2) => Format::R { funct7: 0b0000100, rs2, rs1, funct3: 0b000, rd, opcode: 0b1010011 },
-            FMUL_S(rd, rs1, rs2) => Format::R { funct7: 0b0001000, rs2, rs1, funct3: 0b000, rd, opcode: 0b1010011 },
-            FDIV_S(rd, rs1, rs2) => Format::R { funct7: 0b0001100, rs2, rs1, funct3: 0b000, rd, opcode: 0b1010011 },
-            FSQRT_S(rd, rs1) => Format::R { funct7: 0b0101100, rs2: 0b00000, rs1, funct3: 0b000, rd, opcode: 0b1010011 },
+            FLW(rd, ofs, rs1) => Format::I { imm: (ofs << 2) as u32, rs1, funct3: 0b010, rd, opcode: 0b0000111 },
+            FSW(rs2, ofs, rs1) => Format::S { imm: (ofs << 2) as u32, rs2, rs1, funct3: 0b010, opcode: 0b0100111 },
+            FADD_S(rd, rs1, rs2) => Format::R { funct7: 0b0000000, rs2, rs1, funct3: 0b111, rd, opcode: 0b1010011 },
+            FSUB_S(rd, rs1, rs2) => Format::R { funct7: 0b0000100, rs2, rs1, funct3: 0b111, rd, opcode: 0b1010011 },
+            FMUL_S(rd, rs1, rs2) => Format::R { funct7: 0b0001000, rs2, rs1, funct3: 0b111, rd, opcode: 0b1010011 },
+            FDIV_S(rd, rs1, rs2) => Format::R { funct7: 0b0001100, rs2, rs1, funct3: 0b111, rd, opcode: 0b1010011 },
+            FSQRT_S(rd, rs1) => Format::R { funct7: 0b0101100, rs2: 0b00000, rs1, funct3: 0b111, rd, opcode: 0b1010011 },
             FMIN_S(rd, rs1, rs2) => Format::R { funct7: 0b0010100, rs2, rs1, funct3: 0b000, rd, opcode: 0b1010011 },
             FMAX_S(rd, rs1, rs2) => Format::R { funct7: 0b0010100, rs2, rs1, funct3: 0b001, rd, opcode: 0b1010011 },
             
-            FMADD_S(rd, rs1, rs2, rs3) => Format::R4 { rs3, funct2: 0b00, rs2, rs1, funct3: 0b000, rd, opcode: 0b1000011 },
-            FMSUB_S(rd, rs1, rs2, rs3) => Format::R4 { rs3, funct2: 0b00, rs2, rs1, funct3: 0b000, rd, opcode: 0b1000111 },
-            FNMSUB_S(rd, rs1, rs2, rs3) => Format::R4 { rs3, funct2: 0b00, rs2, rs1, funct3: 0b000, rd, opcode: 0b1001011 },
-            FNMADD_S(rd, rs1, rs2, rs3) => Format::R4 { rs3, funct2: 0b00, rs2, rs1, funct3: 0b000, rd, opcode: 0b1001111 },
+            FMADD_S(rd, rs1, rs2, rs3) => Format::R4 { rs3, funct2: 0b00, rs2, rs1, funct3: 0b111, rd, opcode: 0b1000011 },
+            FMSUB_S(rd, rs1, rs2, rs3) => Format::R4 { rs3, funct2: 0b00, rs2, rs1, funct3: 0b111, rd, opcode: 0b1000111 },
+            FNMSUB_S(rd, rs1, rs2, rs3) => Format::R4 { rs3, funct2: 0b00, rs2, rs1, funct3: 0b111, rd, opcode: 0b1001011 },
+            FNMADD_S(rd, rs1, rs2, rs3) => Format::R4 { rs3, funct2: 0b00, rs2, rs1, funct3: 0b111, rd, opcode: 0b1001111 },
 
             FSGNJ_S(rd, rs1, rs2) => Format::R { funct7: 0b0010000, rs2, rs1, funct3: 0b000, rd, opcode: 0b1010011 },
             FSGNJN_S(rd, rs1, rs2) => Format::R { funct7: 0b0010000, rs2, rs1, funct3: 0b001, rd, opcode: 0b1010011 },
@@ -180,16 +180,16 @@ pub fn assemble(assembly: Vec<Assembly>) -> Result<Vec<u32>, String> {
             FLT_S(rd, rs1, rs2) => Format::R { funct7: 0b1010000, rs2, rs1, funct3: 0b001, rd, opcode: 0b1010011 },
             FEQ_S(rd, rs1, rs2) => Format::R { funct7: 0b1010000, rs2, rs1, funct3: 0b010, rd, opcode: 0b1010011 },
 
-            FCVT_W_S(rd, rs1) => Format::R { funct7: 0b1100000, rs2: 0b00000, rs1, funct3: 0b000, rd, opcode: 0b1010011 },
-            FCVT_WU_S(rd, rs1) => Format::R { funct7: 0b1100000, rs2: 0b00001, rs1, funct3: 0b000, rd, opcode: 0b1010011 },
-            FCVT_S_W(rd, rs1) => Format::R { funct7: 0b1101000, rs2: 0b00000, rs1, funct3: 0b000, rd, opcode: 0b1010011 },
-            FCVT_S_WU(rd, rs1) => Format::R { funct7: 0b1101000, rs2: 0b00001, rs1, funct3: 0b000, rd, opcode: 0b1010011 },
+            FCVT_W_S(rd, rs1) => Format::R { funct7: 0b1100000, rs2: 0b00000, rs1, funct3: 0b111, rd, opcode: 0b1010011 },
+            FCVT_WU_S(rd, rs1) => Format::R { funct7: 0b1100000, rs2: 0b00001, rs1, funct3: 0b111, rd, opcode: 0b1010011 },
+            FCVT_S_W(rd, rs1) => Format::R { funct7: 0b1101000, rs2: 0b00000, rs1, funct3: 0b111, rd, opcode: 0b1010011 },
+            FCVT_S_WU(rd, rs1) => Format::R { funct7: 0b1101000, rs2: 0b00001, rs1, funct3: 0b111, rd, opcode: 0b1010011 },
             FMV_X_W(rd, rs1) => Format::R { funct7: 0b1110000, rs2: 0b00000, rs1, funct3: 0b000, rd, opcode: 0b1010011 },
             FMV_W_X(rd, rs1) => Format::R { funct7: 0b1111000, rs2: 0b00000, rs1, funct3: 0b000, rd, opcode: 0b1010011 },
 
             FCLASS_S(rd, rs1) => Format::R { funct7: 0b1110000, rs2: 0b00000, rs1, funct3: 0b001, rd, opcode: 0b1010011 },
 
-            FNORM_S(rd, rs1, rs2, rs3) => Format::R4 { rs3, funct2: 0b01, rs2, rs1, funct3: 0b000, rd, opcode: 0b1000011 },
+            FNORM_S(rd, rs1, rs2, rs3) => Format::R4 { rs3, funct2: 0b01, rs2, rs1, funct3: 0b111, rd, opcode: 0b1000011 },
         };
         match formatted.as_u32() {
             Ok(u) => {res.push(u);}
