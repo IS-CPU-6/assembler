@@ -55,3 +55,31 @@ label:
     fsw f1, -12(x2)
 
     fadd.s f1, f2, f3
+    fsub.s f1, f2, f3
+    fmul.s f1, f2, f3
+    fdiv.s f1, f2, f3
+    fsqrt.s f1, f2
+    fmin.s f1, f2, f3
+    fmax.s f1, f2, f3
+
+    fmadd.s f1, f2, f3, f4
+    fmsub.s f1, f2, f3, f4
+    fnmsub.s f1, f2, f3, f4
+    fnmadd.s f1, f2, f3, f4
+
+    fsgnj.s f1, f2, f3
+    fsgnjn.s f1, f2, f3
+    fsgnjx.s f1, f2, f3
+
+    fle.s x1, f1, f2
+    flt.s x1, f1, f2
+    feq.s x1, f1, f2
+    
+    fcvt.w.s x1, f1
+    fcvt.wu.s x1, f1
+    fcvt.s.w f1, x1
+    fcvt.s.wu f1, x1
+    fmv.x.w x1, f1
+    fmv.w.x f1, x1
+    
+    fclass.s x1, f1

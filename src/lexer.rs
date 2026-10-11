@@ -3,7 +3,7 @@ use logos::Logos;
 #[derive(Logos, Debug, Clone, PartialEq)]
 #[logos(skip r"[ \t\f]+")]
 pub enum Token<'s> {
-    #[regex(r"[a-zA-Z_][a-zA-Z0-9_]*", |lex| lex.slice())]
+    #[regex(r"[a-zA-Z_][a-zA-Z0-9_.]*", |lex| lex.slice())]
     Id(&'s str),
 
     #[regex(r"[x|f][0-9]+|sp|fp|ra", |lex| {
