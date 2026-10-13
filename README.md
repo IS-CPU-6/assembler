@@ -5,7 +5,7 @@
 
 # 使い方
 ```shell
-cargo run --input test/label.s --output hoge.bin
+cargo run -- --input test/label.s --output hoge.bin
 ```
 
 # テスト
