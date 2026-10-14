@@ -1,3 +1,4 @@
+set -euo pipefail
 dir=$(dirname "$1")
 base=$(basename "$1" .bin)
 name="$dir/$base"

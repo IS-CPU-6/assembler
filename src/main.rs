@@ -20,11 +20,6 @@ pub fn write_to_bin(path: &str, bin: &[u32]) -> io::Result<()> {
     Ok(())
 }
 
-fn parse_hex(s: &str) -> Result<u32, String> {
-    let hex = s.strip_prefix("0x").ok_or("invalid hex format")?;
-    u32::from_str_radix(hex, 16).map_err(|e| e.to_string())
-}
-
 #[derive(Parser)]
 #[command(author, version, about = "", long_about = None)]
 struct Cli {
@@ -66,7 +61,7 @@ fn main() {
         ])
     }
 
-    println!("{:?}", assembly);
+    // println!("{:?}", assembly);
 
     let bin = assembler::assemble(assembly)
         .unwrap_or_else(|e| exit(&format!("failed to assemble: {}", e)));

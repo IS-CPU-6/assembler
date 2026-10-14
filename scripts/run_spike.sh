@@ -1,4 +1,5 @@
 # run_spike.sh hoge.elf hoge.log
+set -euo pipefail
 
 # .elfを受け取って走らす
 spike --pc=0x80000000 --isa=rv32i -m0x20000000:0x1000,0x80000000:0x20000000 --log-commits "$1" 2> "$2"
