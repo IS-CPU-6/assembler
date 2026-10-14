@@ -6,6 +6,6 @@ SECTIONS
     *(.text)
   }
 
-  tohost = 0x20000000;
-  fromhost = 0x20000004;
+  tohost = 0x700000f8;
+  fromhost = 0x700000fc;
 }

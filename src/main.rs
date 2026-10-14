@@ -51,7 +51,7 @@ fn main() {
     );
     if cli.spike_sim {
         // spike sim終了用
-        let to_host: u32 = 0x2000_0000;
+        let to_host: u32 = 0x7000_00f8;
         assembly.extend(vec![
             Assembly::LUI(1, (to_host & 0xFFFF_F000) >> 12),
             Assembly::ADDI(1, 1, (to_host & 0x0000_0FFF).try_into().unwrap()),
