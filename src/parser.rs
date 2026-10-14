@@ -116,7 +116,7 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<Vec<Assembly>, String> {
         one_line = vec![];
     }
 
-    println!("{:?}", label_map);
+    // println!("{:?}", label_map);
 
     // assemble
     let mut assembly = Vec::new();
