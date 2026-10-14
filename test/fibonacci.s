@@ -25,5 +25,3 @@ return_t1:
     addi x10, x6, 0
 
 exit:
-    addi x17, x0, 10
-    ebreak

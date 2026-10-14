@@ -3,9 +3,22 @@
 
 仕様はほぼRV32IMF
 
+# 未実装
+- 各種疑似命令
+
 # 使い方
+- .binを出力する (現時点では平行移動可能なバイナリになっている)
 ```shell
-cargo run -- --input test/label.s --output hoge.bin
+cargo run -- --input test/fibonacci.s --output fibonacci.bin
+```
+
+- `spike-sim` で実行する場合はこのようにする。
+- 入力されたアセンブリの末尾にspike-simulatorの終了処理を足してからアセンブルしているので、プログラムが末尾以外で終了しないようにすること。ebreakは必要ない。
+```shell
+mkdir -p build
+cargo run -- --input test/fibonacci.s --output build/fibonacci.bin --spike-sim
+./scripts/generate_elf.sh build/fibonacci.bin # .binから.elfを作る
+./scripts/run_spike.sh build/fibonacci.elf build/fibonacci.log # .elfをspikeに渡す。トレースが出る
 ```
 
 # テスト

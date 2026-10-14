@@ -41,8 +41,6 @@ label:
     or x1, x2, x3
     and x1, x2, x3
 
-    ebreak
-
     mul x1, x2, x3
     mulh x1, x2, x3
     mulhsu x1, x2, x3
@@ -83,3 +81,5 @@ label:
     fmv.w.x f1, x1
     
     fclass.s x1, f1
+
+exit:

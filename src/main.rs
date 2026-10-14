@@ -2,6 +2,8 @@ mod assembler;
 mod lexer;
 mod parser;
 
+use crate::parser::Assembly;
+
 use clap::Parser;
 use std::fs;
 use std::process;
@@ -18,6 +20,11 @@ pub fn write_to_bin(path: &str, bin: &[u32]) -> io::Result<()> {
     Ok(())
 }
 
+fn parse_hex(s: &str) -> Result<u32, String> {
+    let hex = s.strip_prefix("0x").ok_or("invalid hex format")?;
+    u32::from_str_radix(hex, 16).map_err(|e| e.to_string())
+}
+
 #[derive(Parser)]
 #[command(author, version, about = "", long_about = None)]
 struct Cli {
@@ -25,6 +32,8 @@ struct Cli {
     input: String,
     #[arg(short, long)]
     output: String,
+    #[arg(short, long)]
+    spike_sim: bool,
 }
 
 fn exit(msg: &str) -> ! {
@@ -41,8 +50,21 @@ fn main() {
     let tokens =
         lexer::tokenize(&asm).unwrap_or_else(|e| exit(&format!("failed to tokenize: {}", e)));
 
-    let assembly =
-        parser::parse(&tokens).unwrap_or_else(|e| exit(&format!("failed to parse: {}", e)));
+    let mut assembly = Vec::new();
+    assembly.extend(
+        parser::parse(&tokens).unwrap_or_else(|e| exit(&format!("failed to parse: {}", e))),
+    );
+    if cli.spike_sim {
+        // spike sim終了用
+        let to_host: u32 = 0x2000_0000;
+        assembly.extend(vec![
+            Assembly::LUI(1, (to_host & 0xFFFF_F000) >> 12),
+            Assembly::ADDI(1, 1, (to_host & 0x0000_0FFF).try_into().unwrap()),
+            Assembly::ADDI(2, 0, 0x0000_0001),
+            Assembly::SW(2, 0, 1),
+            Assembly::EBREAK,
+        ])
+    }
 
     println!("{:?}", assembly);
 
