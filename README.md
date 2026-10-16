@@ -8,6 +8,7 @@
 
 # 使い方
 - .binを出力する (現時点では平行移動可能なバイナリになっている)
+- ラベルとアドレスの対応関係が`fibonacci.bin.label.yaml`に出力される
 ```shell
 cargo run -- --input test/fibonacci.s --output fibonacci.bin
 ```

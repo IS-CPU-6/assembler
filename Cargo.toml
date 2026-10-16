@@ -6,3 +6,5 @@ edition = "2024"
 [dependencies]
 logos = "0.14"
 clap = { version = "4", features = ["derive"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_yml = "0.0.6"

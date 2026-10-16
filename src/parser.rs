@@ -93,7 +93,7 @@ pub enum Assembly {
 }
 use Assembly::*;
 
-pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<Vec<Assembly>, String> {
+pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<(Vec<Assembly>, HashMap<&'s str, i32>), String> {
     let mut label_map: HashMap<&'s str, i32> = HashMap::new();
     let mut one_line = Vec::new();
     let mut line: i32 = 0;
@@ -115,8 +115,6 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<Vec<Assembly>, String> {
         }
         one_line = vec![];
     }
-
-    // println!("{:?}", label_map);
 
     // assemble
     let mut assembly = Vec::new();
@@ -452,5 +450,5 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<Vec<Assembly>, String> {
         one_line.clear();
     }
 
-    Ok(assembly)
+    Ok((assembly, label_map))
 }
