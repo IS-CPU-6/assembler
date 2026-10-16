@@ -1,5 +1,5 @@
 # assembler
-[![Release](https://img.shields.io/badge/ISA-1st_v0.0.6-blue)](https://docs.google.com/spreadsheets/d/1nd4VlMRf07WgoH0fAjvWLOeL6DX_4LZD6E22ocDrY7Y/edit?hl=ja&gid=584437860#gid=584437860)
+[![Release](https://img.shields.io/badge/ISA-1st_v0.0.7-blue)](https://docs.google.com/spreadsheets/d/1nd4VlMRf07WgoH0fAjvWLOeL6DX_4LZD6E22ocDrY7Y/edit?hl=ja&gid=584437860#gid=584437860)
 
 アセンブラ + spike-simによるテストのための便利ツール
 
