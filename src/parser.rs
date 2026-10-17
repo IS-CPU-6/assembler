@@ -118,6 +118,9 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<(Vec<Assembly>, HashMap<&'s 
         }
         match one_line[..] {
             [Id(label), Colon] => {
+                if label_map.contains_key(label) {
+                    return Err(format!("duplicate label: {}", label));
+                }
                 label_map.insert(label, words);
             }
             [] => {}
