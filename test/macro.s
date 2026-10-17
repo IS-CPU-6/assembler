@@ -1,6 +1,9 @@
 _start:
     mv x2, x1
-    li x1, 0x06543219
+    li x1, 0x12345678
+    li x1, 0x87654321
+    li x1, -10000
+    li x1, 10000
     la x1, _start
     la x1, exit
 

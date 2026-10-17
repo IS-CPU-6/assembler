@@ -150,7 +150,7 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<(Vec<Assembly>, HashMap<&'s 
                 vec![JAL(
                     *rd,
                     match dest {
-                        Int(offset) => *offset >> 2,
+                        Int(offset) => (*offset >> 2) as i32,
                         Id(label) => {
                             label_map.get(label).copied().unwrap_or(0) - words as i32
                         }
@@ -169,7 +169,7 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<(Vec<Assembly>, HashMap<&'s 
                 Reg(rs1),
                 Close,
             ] => {
-                vec![JALR(*rd, *offset >> 2, *rs1)]
+                vec![JALR(*rd, (*offset >> 2) as i32, *rs1)]
             }
 
             [Id("beq"), Reg(rs1), Comma, Reg(rs2), Comma, dest] => vec![BEQ(
@@ -177,7 +177,7 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<(Vec<Assembly>, HashMap<&'s 
                 *rs2,
                 match dest {
                     Id(label) => label_map.get(label).copied().unwrap_or(0) - words as i32,
-                    Int(offset) => offset >> 2,
+                    Int(offset) => (offset >> 2) as i32,
                     _ => {
                         return Err(format!("{:?}: invalid branch dest", one_line));
                     }
@@ -188,7 +188,7 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<(Vec<Assembly>, HashMap<&'s 
                 *rs2,
                 match dest {
                     Id(label) => label_map.get(label).copied().unwrap_or(0) - words as i32,
-                    Int(offset) => offset >> 2,
+                    Int(offset) => (offset >> 2) as i32,
                     _ => {
                         return Err(format!("{:?}: invalid branch dest", one_line));
                     }
@@ -199,7 +199,7 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<(Vec<Assembly>, HashMap<&'s 
                 *rs2,
                 match dest {
                     Id(label) => label_map.get(label).copied().unwrap_or(0) - words as i32,
-                    Int(offset) => offset >> 2,
+                    Int(offset) => (offset >> 2) as i32,
                     _ => {
                         return Err(format!("{:?}: invalid branch dest", one_line));
                     }
@@ -210,7 +210,7 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<(Vec<Assembly>, HashMap<&'s 
                 *rs2,
                 match dest {
                     Id(label) => label_map.get(label).copied().unwrap_or(0) - words as i32,
-                    Int(offset) => offset >> 2,
+                    Int(offset) => (offset >> 2) as i32,
                     _ => {
                         return Err(format!("{:?}: invalid branch dest", one_line));
                     }
@@ -221,7 +221,7 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<(Vec<Assembly>, HashMap<&'s 
                 *rs2,
                 match dest {
                     Id(label) => label_map.get(label).copied().unwrap_or(0) - words as i32,
-                    Int(offset) => offset >> 2,
+                    Int(offset) => (offset >> 2) as i32,
                     _ => {
                         return Err(format!("{:?}: invalid branch dest", one_line));
                     }
@@ -232,7 +232,7 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<(Vec<Assembly>, HashMap<&'s 
                 *rs2,
                 match dest {
                     Id(label) => label_map.get(label).copied().unwrap_or(0) - words as i32,
-                    Int(offset) => offset >> 2,
+                    Int(offset) => (offset >> 2) as i32,
                     _ => {
                         return Err(format!("{:?}: invalid branch dest", one_line));
                     }
@@ -240,13 +240,13 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<(Vec<Assembly>, HashMap<&'s 
             )],
 
             [Id("lb"), Reg(rd), Comma, Int(offset), Open, Reg(rs1), Close] => {
-                vec![LB(*rd, ((*offset) as i32).into(), *rs1)]
+                vec![LB(*rd, *offset as i32, *rs1)]
             }
             [Id("lh"), Reg(rd), Comma, Int(offset), Open, Reg(rs1), Close] => {
-                vec![LH(*rd, ((*offset) as i32).into(), *rs1)]
+                vec![LH(*rd, *offset as i32, *rs1)]
             }
             [Id("lw"), Reg(rd), Comma, Int(offset), Open, Reg(rs1), Close] => {
-                vec![LW(*rd, ((*offset) as i32).into(), *rs1)]
+                vec![LW(*rd, *offset as i32, *rs1)]
             }
             [
                 Id("lbu"),
@@ -257,7 +257,7 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<(Vec<Assembly>, HashMap<&'s 
                 Reg(rs1),
                 Close,
             ] => {
-                vec![LBU(*rd, ((*offset) as i32).into(), *rs1)]
+                vec![LBU(*rd, *offset as i32, *rs1)]
             }
             [
                 Id("lhu"),
@@ -268,7 +268,7 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<(Vec<Assembly>, HashMap<&'s 
                 Reg(rs1),
                 Close,
             ] => {
-                vec![LHU(*rd, ((*offset) as i32).into(), *rs1)]
+                vec![LHU(*rd, *offset as i32, *rs1)]
             }
             [
                 Id("sb"),
@@ -279,7 +279,7 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<(Vec<Assembly>, HashMap<&'s 
                 Reg(rs1),
                 Close,
             ] => {
-                vec![SB(*rs2, ((*offset) as i32).into(), *rs1)]
+                vec![SB(*rs2, *offset as i32, *rs1)]
             }
             [
                 Id("sh"),
@@ -290,7 +290,7 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<(Vec<Assembly>, HashMap<&'s 
                 Reg(rs1),
                 Close,
             ] => {
-                vec![SH(*rs2, ((*offset) as i32).into(), *rs1)]
+                vec![SH(*rs2, *offset as i32, *rs1)]
             }
             [
                 Id("sw"),
@@ -301,7 +301,7 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<(Vec<Assembly>, HashMap<&'s 
                 Reg(rs1),
                 Close,
             ] => {
-                vec![SW(*rs2, ((*offset) as i32).into(), *rs1)]
+                vec![SW(*rs2, *offset as i32, *rs1)]
             }
 
             [Id("addi"), Reg(rd), Comma, Reg(r1), Comma, Int(imm)] => {
@@ -365,7 +365,7 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<(Vec<Assembly>, HashMap<&'s 
                 Reg(rs1),
                 Close,
             ] => {
-                vec![FLW(*rd, *offset >> 2, *rs1)]
+                vec![FLW(*rd, (*offset >> 2) as i32, *rs1)]
             }
             [
                 Id("fsw"),
@@ -376,7 +376,7 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<(Vec<Assembly>, HashMap<&'s 
                 Reg(rs1),
                 Close,
             ] => {
-                vec![FSW(*rs2, *offset >> 2, *rs1)]
+                vec![FSW(*rs2, (*offset >> 2) as i32, *rs1)]
             }
             [Id("fadd.s"), Reg(rd), Comma, Reg(r1), Comma, Reg(r2)] => vec![FADD_S(*rd, *r1, *r2)],
             [Id("fsub.s"), Reg(rd), Comma, Reg(r1), Comma, Reg(r2)] => vec![FSUB_S(*rd, *r1, *r2)],
