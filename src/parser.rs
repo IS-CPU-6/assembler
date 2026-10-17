@@ -90,13 +90,20 @@ pub enum Assembly {
     FCLASS_S(u32, u32),
     //
     FNORM_S(u32, u32, u32, u32),
+    //
 }
 use Assembly::*;
+
+fn load_imm32(rd: u32, value: u32) -> Vec<Assembly> {
+    let upper = value.wrapping_add(0x800) >> 12;
+    let lower = value & 0xFFF;
+    vec![LUI(rd, upper), ADDI(rd, rd, lower.try_into().unwrap())]
+}
 
 pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<(Vec<Assembly>, HashMap<&'s str, i32>), String> {
     let mut label_map: HashMap<&'s str, i32> = HashMap::new();
     let mut one_line = Vec::new();
-    let mut line: i32 = 0;
+    let mut words: i32 = 0;
 
     // label -> address
     for token in tokens {
@@ -106,11 +113,14 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<(Vec<Assembly>, HashMap<&'s 
         }
         match one_line[..] {
             [Id(label), Colon] => {
-                label_map.insert(label, line);
+                label_map.insert(label, words);
             }
             [] => {}
+            [Id("li"), ..] | [Id("la"), ..] => {
+                words += 2;
+            }
             _ => {
-                line += 1;
+                words += 1;
             }
         }
         one_line = vec![];
@@ -438,11 +448,71 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<(Vec<Assembly>, HashMap<&'s 
                 Comma,
                 Reg(r3),
             ] => vec![FNORM_S(*rd, *r1, *r2, *r3)],
+
+            // 疑似命令
+
+            [Id("mv"), Reg(rd), Comma, Reg(rs)] => vec![ADDI(*rd, *rs, 0)],
+            [Id("li"), Reg(rd), Comma, Int(imm)] => load_imm32(*rd, *imm as u32),
+            [Id("la"), Reg(rd), Comma, Id(label)] => {
+                let target_words = *label_map
+                    .get(label)
+                    .ok_or_else(|| format!("undefined label: {label}"))?;
+
+                let offset = (target_words - assembly.len() as i32) as i64 * 4;
+
+                let offset = offset as i32;
+                let upper = (offset.wrapping_add(0x800) >> 12) as u32 & 0xF_FFFF;
+                let lower = offset & 0xFFF;
+
+                vec![AUIPC(*rd, upper), ADDI(*rd, *rd, lower)]
+            }
+            [Id("j"), Id(label)] => {
+                let tmp = 6;
+                let words = *label_map
+                    .get(label)
+                    .ok_or_else(|| format!("undefined label: {label}"))?;
+                let addr = words as u32 * 4 + 0x8000_0000;
+                let mut a = load_imm32(tmp, addr.try_into().unwrap());
+                a.push(JALR(0, tmp.try_into().unwrap(), 0));
+                a
+            }
+            [Id("beqz"), Reg(rs), Comma, Id(label)] => vec![BEQ(
+                *rs,
+                0,
+                label_map.get(label).copied().unwrap_or(0) - assembly.len() as i32,
+            )],
+            [Id("bnez"), Reg(rs), Comma, Id(label)] => vec![BNE(
+                *rs,
+                0,
+                label_map.get(label).copied().unwrap_or(0) - assembly.len() as i32,
+            )],
+            [Id("bltz"), Reg(rs), Comma, Id(label)] => vec![BLT(
+                *rs,
+                0,
+                label_map.get(label).copied().unwrap_or(0) - assembly.len() as i32,
+            )],
+
+            [Id("call"), Id(label)] => {
+                let tmp = 6;
+                let words = *label_map
+                    .get(label)
+                    .ok_or_else(|| format!("undefined label: {label}"))?;
+                let addr = words as u32 * 4 + 0x8000_0000;
+                let mut a = load_imm32(tmp, addr.try_into().unwrap());
+                a.push(JALR(1, tmp.try_into().unwrap(), 0));
+                a
+            }
+            [Id("ret")] => vec![JALR(0, 1, 0)],
+            [Id("seqz"), Reg(rd), Comma, Reg(rs)] => vec![SLTIU(*rd, *rs, 1)],
+            [Id("snez"), Reg(rd), Comma, Reg(rs)] => vec![SLTU(*rd, 0, *rs)],
+            [Id("fneg.s"), Reg(fd), Comma, Reg(fs)] => vec![FSGNJN_S(*fd, *fs, *fs)],
+            [Id("fmv.s"), Reg(fd), Comma, Reg(fs)] => vec![FSGNJ_S(*fd, *fs, *fs)],
+
             [] => vec![],
             _ => {
                 return Err(format!(
-                    "invalid expression in line {}: {:?}",
-                    line, one_line
+                    "invalid expression: {:?}",
+                    one_line
                 ));
             }
         };
