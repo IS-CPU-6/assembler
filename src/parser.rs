@@ -94,12 +94,6 @@ pub enum Assembly {
 }
 use Assembly::*;
 
-fn load_imm32(rd: u32, value: u32) -> Vec<Assembly> {
-    let upper = value.wrapping_add(0x800) >> 12;
-    let lower = value & 0xFFF;
-    vec![LUI(rd, upper), ADDI(rd, rd, lower.try_into().unwrap())]
-}
-
 fn label_rel<'s>(
     label_map: &HashMap<&'s str, i32>,
     label: &str,
@@ -464,7 +458,11 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<(Vec<Assembly>, HashMap<&'s 
             // 疑似命令
 
             [Id("mv"), Reg(rd), Comma, Reg(rs)] => vec![ADDI(*rd, *rs, 0)],
-            [Id("li"), Reg(rd), Comma, Int(imm)] => load_imm32(*rd, *imm as u32),
+            [Id("li"), Reg(rd), Comma, Int(imm)] => {
+                let upper = (*imm as u32).wrapping_add(0x800) >> 12;
+                let lower = *imm as u32 & 0xFFF;
+                vec![LUI(*rd, upper), ADDI(*rd, *rd, lower.try_into().unwrap())]
+            }
 
             [Id("la"), Reg(rd), Comma, Id(label)] => {
                 let offset = label_rel(&label_map, label, words)? * 4;
