@@ -1,10 +1,11 @@
-cd $(dirname $0)
+#!/bin/bash
+INPUT="$(realpath "$1")"
+cd "$(dirname "$0")"
 
 cargo build
 
 mkdir -p build
 
-INPUT=$1
 BASE=$(basename "$INPUT" .s)
 MY_BIN="build/${BASE}_my.bin"
 REF_O="build/${BASE}_ref.o"
