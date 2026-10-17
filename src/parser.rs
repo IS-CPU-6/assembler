@@ -127,7 +127,7 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<(Vec<Assembly>, HashMap<&'s 
                 label_map.insert(label, words);
             }
             [] => {}
-            [Id("li"), ..] | [Id("la"), ..] => {
+            [Id("li"), ..] | [Id("la"), ..] | [Id("call"), ..] => {
                 words += 2;
             }
             _ => {
@@ -474,7 +474,12 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<(Vec<Assembly>, HashMap<&'s 
             }
 
             [Id("j"), Id(label)] => vec![JAL(0, label_rel(&label_map, label, words)?)],
-            [Id("call"), Id(label)] => vec![JAL(1, label_rel(&label_map, label, words)?)],
+            [Id("call"), Id(label)] => {
+                let offset = label_rel(&label_map, label, words)? * 4;
+                let upper = (offset.wrapping_add(0x800) >> 12) as u32 & 0xF_FFFF;
+                let lower = offset & 0xFFF;
+                vec![AUIPC(1, upper), JALR(1, lower / 4, 1)]
+            }
             [Id("ret")] => vec![JALR(0, 0, 1)],
 
             [Id("beqz"), Reg(rs), Comma, Id(label)] => vec![BEQ(*rs, 0, label_rel(&label_map, label, words)?)],

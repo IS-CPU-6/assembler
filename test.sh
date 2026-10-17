@@ -15,7 +15,7 @@ REF_ELF="build/${BASE}_ref.elf"
 
 cargo run --quiet -- --input "$INPUT" --output "$MY_BIN"
 riscv64-unknown-elf-as -march=rv32imf -mabi=ilp32f -o "$REF_O" "$INPUT"
-riscv64-unknown-elf-ld -m elf32lriscv -Ttext=0x80000000 -o "$REF_ELF" "$REF_O"
+riscv64-unknown-elf-ld -m elf32lriscv --no-relax -Ttext=0x80000000 -o "$REF_ELF" "$REF_O"
 riscv64-unknown-elf-objcopy -O binary "$REF_ELF" "$REF_BIN"
 
 xxd "$MY_BIN" > "$MY_TXT"

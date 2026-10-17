@@ -1,14 +1,14 @@
 _start:
     mv x2, x1
     li x1, 0x06543219
-    la x1, end
+    la x1, exit
 
-    j end
-    beqz x1, end
-    bnez x1, end
-    bltz x1, end
+    j exit
+    beqz x1, exit
+    bnez x1, exit
+    bltz x1, exit
 
-    call end
+    call exit
     ret
 
     seqz x1, x2
