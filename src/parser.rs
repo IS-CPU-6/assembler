@@ -461,7 +461,7 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<(Vec<Assembly>, HashMap<&'s 
             [Id("li"), Reg(rd), Comma, Int(imm)] => {
                 let upper = (*imm as u32).wrapping_add(0x800) >> 12;
                 let lower = *imm as u32 & 0xFFF;
-                vec![LUI(*rd, upper), ADDI(*rd, *rd, lower.try_into().unwrap())]
+                vec![LUI(*rd, upper), ADDI(*rd, *rd, lower as i32)]
             }
 
             [Id("la"), Reg(rd), Comma, Id(label)] => {

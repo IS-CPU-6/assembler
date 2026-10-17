@@ -69,7 +69,7 @@ fn main() {
         // spike sim終了用
         assembly.extend(vec![
             Assembly::LUI(1, (to_host & 0xFFFF_F000) >> 12),
-            Assembly::ADDI(1, 1, (to_host & 0x0000_0FFF).try_into().unwrap()),
+            Assembly::ADDI(1, 1, (to_host & 0x0000_0FFF) as i32),
             Assembly::ADDI(2, 0, 0x0000_0001),
             Assembly::SW(2, 0, 1),
             Assembly::EBREAK,
