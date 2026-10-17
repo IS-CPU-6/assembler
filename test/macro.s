@@ -1,5 +1,6 @@
+_start:
     mv x2, x1
-    li x1, 0x06543210
+    li x1, 0x06543219
     la x1, end
 
     j end
@@ -16,4 +17,4 @@
     fneg.s f1, f2
     fmv.s f1, f2
 
-end:
+exit:

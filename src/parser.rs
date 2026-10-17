@@ -100,6 +100,17 @@ fn load_imm32(rd: u32, value: u32) -> Vec<Assembly> {
     vec![LUI(rd, upper), ADDI(rd, rd, lower.try_into().unwrap())]
 }
 
+fn label_rel<'s>(
+    label_map: &HashMap<&'s str, i32>,
+    label: &str,
+    words: u32,
+) -> Result<i32, String> {
+    let target_words = *label_map
+        .get(label)
+        .ok_or_else(|| format!("undefined label: {label}"))? as i64;
+    Ok((target_words - words as i64) as i32)
+}
+
 pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<(Vec<Assembly>, HashMap<&'s str, i32>), String> {
     let mut label_map: HashMap<&'s str, i32> = HashMap::new();
     let mut one_line = Vec::new();
@@ -131,6 +142,7 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<(Vec<Assembly>, HashMap<&'s 
     one_line = Vec::new();
 
     for token in tokens {
+        let words = assembly.len() as u32;
         if *token != Return {
             one_line.push(token);
             continue;
@@ -146,7 +158,7 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<(Vec<Assembly>, HashMap<&'s 
                     match dest {
                         Int(offset) => *offset >> 2,
                         Id(label) => {
-                            label_map.get(label).copied().unwrap_or(0) - assembly.len() as i32
+                            label_map.get(label).copied().unwrap_or(0) - words as i32
                         }
                         _ => {
                             return Err(format!("{:?}: invalid branch dest", one_line));
@@ -170,7 +182,7 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<(Vec<Assembly>, HashMap<&'s 
                 *rs1,
                 *rs2,
                 match dest {
-                    Id(label) => label_map.get(label).copied().unwrap_or(0) - assembly.len() as i32,
+                    Id(label) => label_map.get(label).copied().unwrap_or(0) - words as i32,
                     Int(offset) => offset >> 2,
                     _ => {
                         return Err(format!("{:?}: invalid branch dest", one_line));
@@ -181,7 +193,7 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<(Vec<Assembly>, HashMap<&'s 
                 *rs1,
                 *rs2,
                 match dest {
-                    Id(label) => label_map.get(label).copied().unwrap_or(0) - assembly.len() as i32,
+                    Id(label) => label_map.get(label).copied().unwrap_or(0) - words as i32,
                     Int(offset) => offset >> 2,
                     _ => {
                         return Err(format!("{:?}: invalid branch dest", one_line));
@@ -192,7 +204,7 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<(Vec<Assembly>, HashMap<&'s 
                 *rs1,
                 *rs2,
                 match dest {
-                    Id(label) => label_map.get(label).copied().unwrap_or(0) - assembly.len() as i32,
+                    Id(label) => label_map.get(label).copied().unwrap_or(0) - words as i32,
                     Int(offset) => offset >> 2,
                     _ => {
                         return Err(format!("{:?}: invalid branch dest", one_line));
@@ -203,7 +215,7 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<(Vec<Assembly>, HashMap<&'s 
                 *rs1,
                 *rs2,
                 match dest {
-                    Id(label) => label_map.get(label).copied().unwrap_or(0) - assembly.len() as i32,
+                    Id(label) => label_map.get(label).copied().unwrap_or(0) - words as i32,
                     Int(offset) => offset >> 2,
                     _ => {
                         return Err(format!("{:?}: invalid branch dest", one_line));
@@ -214,7 +226,7 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<(Vec<Assembly>, HashMap<&'s 
                 *rs1,
                 *rs2,
                 match dest {
-                    Id(label) => label_map.get(label).copied().unwrap_or(0) - assembly.len() as i32,
+                    Id(label) => label_map.get(label).copied().unwrap_or(0) - words as i32,
                     Int(offset) => offset >> 2,
                     _ => {
                         return Err(format!("{:?}: invalid branch dest", one_line));
@@ -225,7 +237,7 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<(Vec<Assembly>, HashMap<&'s 
                 *rs1,
                 *rs2,
                 match dest {
-                    Id(label) => label_map.get(label).copied().unwrap_or(0) - assembly.len() as i32,
+                    Id(label) => label_map.get(label).copied().unwrap_or(0) - words as i32,
                     Int(offset) => offset >> 2,
                     _ => {
                         return Err(format!("{:?}: invalid branch dest", one_line));
@@ -453,56 +465,22 @@ pub fn parse<'s>(tokens: &Vec<Token<'s>>) -> Result<(Vec<Assembly>, HashMap<&'s 
 
             [Id("mv"), Reg(rd), Comma, Reg(rs)] => vec![ADDI(*rd, *rs, 0)],
             [Id("li"), Reg(rd), Comma, Int(imm)] => load_imm32(*rd, *imm as u32),
+
             [Id("la"), Reg(rd), Comma, Id(label)] => {
-                let target_words = *label_map
-                    .get(label)
-                    .ok_or_else(|| format!("undefined label: {label}"))?;
-
-                let offset = (target_words - assembly.len() as i32) as i64 * 4;
-
-                let offset = offset as i32;
+                let offset = label_rel(&label_map, label, words)? * 4;
                 let upper = (offset.wrapping_add(0x800) >> 12) as u32 & 0xF_FFFF;
                 let lower = offset & 0xFFF;
-
                 vec![AUIPC(*rd, upper), ADDI(*rd, *rd, lower)]
             }
-            [Id("j"), Id(label)] => {
-                let tmp = 6;
-                let words = *label_map
-                    .get(label)
-                    .ok_or_else(|| format!("undefined label: {label}"))?;
-                let addr = words as u32 * 4 + 0x8000_0000;
-                let mut a = load_imm32(tmp, addr.try_into().unwrap());
-                a.push(JALR(0, tmp.try_into().unwrap(), 0));
-                a
-            }
-            [Id("beqz"), Reg(rs), Comma, Id(label)] => vec![BEQ(
-                *rs,
-                0,
-                label_map.get(label).copied().unwrap_or(0) - assembly.len() as i32,
-            )],
-            [Id("bnez"), Reg(rs), Comma, Id(label)] => vec![BNE(
-                *rs,
-                0,
-                label_map.get(label).copied().unwrap_or(0) - assembly.len() as i32,
-            )],
-            [Id("bltz"), Reg(rs), Comma, Id(label)] => vec![BLT(
-                *rs,
-                0,
-                label_map.get(label).copied().unwrap_or(0) - assembly.len() as i32,
-            )],
 
-            [Id("call"), Id(label)] => {
-                let tmp = 6;
-                let words = *label_map
-                    .get(label)
-                    .ok_or_else(|| format!("undefined label: {label}"))?;
-                let addr = words as u32 * 4 + 0x8000_0000;
-                let mut a = load_imm32(tmp, addr.try_into().unwrap());
-                a.push(JALR(1, tmp.try_into().unwrap(), 0));
-                a
-            }
-            [Id("ret")] => vec![JALR(0, 1, 0)],
+            [Id("j"), Id(label)] => vec![JAL(0, label_rel(&label_map, label, words)?)],
+            [Id("call"), Id(label)] => vec![JAL(1, label_rel(&label_map, label, words)?)],
+            [Id("ret")] => vec![JALR(0, 0, 1)],
+
+            [Id("beqz"), Reg(rs), Comma, Id(label)] => vec![BEQ(*rs, 0, label_rel(&label_map, label, words)?)],
+            [Id("bnez"), Reg(rs), Comma, Id(label)] => vec![BNE(*rs, 0, label_rel(&label_map, label, words)?)],
+            [Id("bltz"), Reg(rs), Comma, Id(label)] => vec![BLT(*rs, 0, label_rel(&label_map, label, words)?)],
+
             [Id("seqz"), Reg(rd), Comma, Reg(rs)] => vec![SLTIU(*rd, *rs, 1)],
             [Id("snez"), Reg(rd), Comma, Reg(rs)] => vec![SLTU(*rd, 0, *rs)],
             [Id("fneg.s"), Reg(fd), Comma, Reg(fs)] => vec![FSGNJN_S(*fd, *fs, *fs)],
