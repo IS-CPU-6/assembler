@@ -74,6 +74,8 @@ fn main() {
             Assembly::SW(2, 0, 1),
             Assembly::EBREAK,
         ])
+    } else {
+        assembly.push(Assembly::EBREAK);
     }
 
     let bin = assembler::assemble(assembly)
